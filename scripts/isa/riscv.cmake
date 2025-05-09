@@ -1,8 +1,8 @@
 set(INSTPAT_NAMES base compressed)
 
-set(INSTPAT_SRC_DIR ${CMAKE_SOURCE_DIR}/src/cpu/riscv/instpat)
-set(INSTPAT_DST_DIR ${CMAKE_SOURCE_DIR}/src/cpu/riscv/autogen)
-set(DECODE_GEN_SCRIPT ${CMAKE_SOURCE_DIR}/scripts/riscv-decoder-gen/main.py)
+set(INSTPAT_SRC_DIR ${PROJECT_SOURCE_DIR}/src/cpu/riscv/instpat)
+set(INSTPAT_DST_DIR ${PROJECT_SOURCE_DIR}/src/cpu/riscv/autogen)
+set(DECODE_GEN_SCRIPT ${PROJECT_SOURCE_DIR}/scripts/riscv-decoder-gen/main.py)
 
 foreach(name ${INSTPAT_NAMES})
     set(instpat_src ${INSTPAT_SRC_DIR}/${name}.instpat)
@@ -18,6 +18,7 @@ foreach(name ${INSTPAT_NAMES})
 endforeach()
 
 set(INSTPAT_DST_FILES)
+
 foreach(name ${INSTPAT_NAMES})
     list(APPEND INSTPAT_DST_FILES ${INSTPAT_DST_DIR}/${name}-decoder.inc)
 endforeach()
@@ -26,9 +27,4 @@ add_custom_target(instpat
     DEPENDS ${INSTPAT_DST_FILES}
 )
 
-if (${TARGET_APP})
-    add_dependencies(${KXEMU_TARGET} instpat)
-    llvm_map_components_to_libnames(LLVM_LIBS
-        RISCVDisassembler
-    )
-endif()
+add_dependencies(${KXEMU_TARGET} instpat)

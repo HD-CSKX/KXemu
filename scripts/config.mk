@@ -1,21 +1,28 @@
-CONFIG_FILE = ./configs/include/config/auto.conf
-CONFIG_DIR = ./configs
-CONF = ./tools/kconfig/build/conf
-MCONF = ./tools/kconfig/build/mconf
+CONFIG_DIR := $(KXEMU_HOME)/configs
+CONFIG_FILE := $(CONFIG_DIR)/include/config/auto.conf
+CONF := $(KXEMU_HOME)/tools/kconfig/build/conf
+MCONF := $(KXEMU_HOME)/tools/kconfig/build/mconf
+rm-distclean := $(CONFIG_DIR)/.config $(CONFIG_DIR)/.config.old $(CONFIG_DIR)/include
 
-ifeq ($(wildcard $(CONFIG_FILE)),)
-$(warning $(CONFIG_FILE) not found, run make menuconfig first)
+ifeq ($(wildcard $(CONFIG_DIR)/.config),)
+$(warning Warning: $(CONFIG_DIR)/.config does not exist!)
+$(warning To build the project, first run 'make menuconfig'.)
 endif
 
 -include $(CONFIG_FILE)
 
 $(CONF):
-	@ make -C ./tools/kconfig NAME=conf
+	@ make -C $(KXEMU_HOME)/tools/kconfig NAME=conf
 
 $(MCONF):
-	@ make -C ./tools/kconfig NAME=mconf
+	@ make -C $(KXEMU_HOME)/tools/kconfig NAME=mconf
 
 menuconfig: $(CONF) $(MCONF)
-	@ cd $(CONFIG_DIR) && ../$(MCONF) -s Kconfig
-	@ cd $(CONFIG_DIR) && ../$(CONF) -s --syncconfig Kconfig
+	@ cd $(CONFIG_DIR) && $(MCONF) -s Kconfig
+	@ cd $(CONFIG_DIR) && $(CONF) -s --syncconfig Kconfig
 	@ cp $(CONFIG_DIR)/include/generated/autoconf.h ./include/config
+
+distclean:
+	-@ rm -rf $(rm-distclean)
+
+.PHONY: distclean

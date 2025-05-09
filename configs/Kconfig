@@ -1,62 +1,124 @@
-mainmenu "KXemu Configurations"
+mainmenu "KXemu Configuration Menu"
 
 choice
-    prompt "ISA"
+    prompt "Base ISA"
     default ISA_riscv32
-
 config ISA_riscv32
     bool "riscv32"
-
 config ISA_riscv64
     bool "riscv64"
-
+config ISA_loongarch32r
+    bool "loongarch32-reduced"
 config ISA_loongarch32
     bool "loongarch32"
-
 config ISA_loongarch64
     bool "loongarch64"
-
 endchoice
 
 config ISA
     string
-    default riscv32 if ISA_riscv32
-    default riscv64 if ISA_riscv64
-    default loongarch32 if ISA_loongarch32
-    default loongarch64 if ISA_loongarch64
+    default "riscv32" if ISA_riscv32
+    default "riscv64" if ISA_riscv64
+    default "loongarch32r" if ISA_loongarch32r
+    default "loongarch32" if ISA_loongarch32
+    default "loongarch64" if ISA_loongarch64
+    default "none"
 
 config BASE_ISA
     string
-    default riscv if ISA_riscv32
-    default riscv if ISA_riscv64
-    default loongarch if ISA_loongarch32
-    default loongarch if ISA_loongarch64
+    default "riscv" if ISA_riscv32
+    default "riscv" if ISA_riscv64
+    default "loongarch" if ISA_loongarch32r
+    default "loongarch" if ISA_loongarch32
+    default "loongarch" if ISA_loongarch64
+    default "none"
 
-config SRC_CPU_ISA
-    string
-    default riscv if ISA_riscv32
-    default riscv if ISA_riscv64
-    default loongarch if ISA_loongarch32
-    default loongarch if ISA_loongarch64
-
-config LOG
-    bool "LOG"
-
-config HINT
-    bool "Show hints"
-
-menu "Cache"
-
+menu "Core Options"
 config ICache
     bool "Enable ICache"
 
 config DCache
     bool "Enable DCache"
 
+choice
+  prompt "FPU Emulation"
+  default FPU_HOST
+config FPU_HOST
+  bool "Use host floating point operation"
+config FPU_SOFT
+  bool "Use softfloat library"
+config FPU_NONE
+  bool "Disable FPU Emulation"
+endchoice
 endmenu
 
-menu "DEBUG mode"
+choice
+  prompt "Kxemu execution engine"
+  default ENGINE_INTERPRETER
 
+config ENGINE_INTERPRETER
+  bool "Interpreter"
+  help
+    Interpreter guest instructions one by one.
+endchoice
+
+config ENGINE
+  string
+  default "interpreter" if ENGINE_INTERPRETER
+  default "none"
+
+choice
+  prompt "Running mode"
+  default MODE_SYSTEM
+
+config MODE_SYSTEM
+  bool "System mode"
+  help
+    Support full-system functionality, including privileged instructions, MMU and devices.
+endchoice
+
+choice
+  prompt "Build target"
+  default TARGET_NATIVE_ELF
+config TARGET_NATIVE_ELF
+  bool "Executable on Linux Native"
+config TARGET_SHARE
+  bool "Shared object (used as REF for differential testing)"
+endchoice
+
+menu "Build Options"
+choice
+    prompt "Compiler"
+    default CC_CLANGPP
+config CC_GPP
+    bool "g++"
+config CC_CLANGPP
+    bool "clang++"
+endchoice
+
+config CC
+  string
+  default "g++" if CC_GPP
+  default "clang++" if CC_CLANGPP
+  default "none"
+
+config CC_ADDRASAN
+  bool "Enable address sanitizer"
+  default n
+
+config CC_UBASAN
+  bool "Enable undefined sanitizer"
+  default n
+endmenu
+
+menu "Testing and Debugging"
+config LOG
+    bool "Enable log"
+
+config HINT
+    bool "Show hints"
+
+menu "DEBUG mode"
 config DEBUG
     bool "DEBUG mode"
 
@@ -65,5 +127,6 @@ config DEBUG_DECODER
 
 config DEBUG_DCACHE
     bool "DEBUG dcache" if DEBUG && DCache
-
 endmenu
+endmenu
+

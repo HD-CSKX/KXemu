@@ -18,6 +18,7 @@ foreach(name ${INSTPAT_NAMES})
 endforeach()
 
 set(INSTPAT_DST_FILES)
+
 foreach(name ${INSTPAT_NAMES})
     list(APPEND INSTPAT_DST_FILES ${INSTPAT_DST_DIR}/${name}-decoder.inc)
 endforeach()
@@ -26,6 +27,4 @@ add_custom_target(instpat
     DEPENDS ${INSTPAT_DST_FILES}
 )
 
-if(TARGET kxemu-system-${ISA})
-    add_dependencies(kxemu-system-${ISA} instpat)
-endif()
+add_dependencies(${KXEMU_TARGET} instpat)
